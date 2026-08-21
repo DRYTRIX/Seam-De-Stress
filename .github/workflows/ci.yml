@@ -100,3 +100,30 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # Publishes the GitHub Release entry for the pushed tag (Releases tab —
+  # distinct from the Docker Hub image above). Runs independently of
+  # docker-release so a release still gets published even if the Docker
+  # Hub secrets aren't configured yet; uses the default GITHUB_TOKEN, no
+  # extra secrets needed. Idempotent: re-running the workflow on a tag that
+  # already has a release just skips instead of erroring.
+  github-release:
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists, skipping."
+          else
+            gh release create "$GITHUB_REF_NAME" \
+              --title "$GITHUB_REF_NAME" \
+              --generate-notes
+          fi

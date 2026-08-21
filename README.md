@@ -6,6 +6,9 @@
 
 **Track clients. Plan the workload. Quote and invoice. All in one place.**
 
+[![CI](https://github.com/DRYTRIX/Seam-De-Stress/actions/workflows/ci.yml/badge.svg)](https://github.com/DRYTRIX/Seam-De-Stress/actions/workflows/ci.yml)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
+
 [🎯 What is it?](#-what-is-it) • [🚀 Quick Start](#-quick-start) • [✨ Features](#-features) • [📸 Screenshots](#-screenshots) • [⚙️ Configuration](#️-configuration) • [🧵 Tech Stack](#-tech-stack) • [🛠️ Development](#️-development) • [🌍 Translations](#-translations)
 
 ---
@@ -185,4 +188,7 @@ pybabel compile -d app/translations
 
 ## License
 
-TBD.
+Licensed under the [GNU Affero General Public License v3.0](LICENSE). In
+short: you're free to run, study, modify, and redistribute this software —
+but if you run a modified version as a network service, you must make that
+version's source available to its users too.

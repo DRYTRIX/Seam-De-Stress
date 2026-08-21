@@ -144,6 +144,13 @@ decisions and conventions.
   limiting disabled) — fast, no Docker required for unit/route tests.
 - Run locally: `pip install -r requirements-dev.txt && pytest -q`.
 - Lint: `ruff check .` (config in `pyproject.toml`).
+- `pytest.ini` sets `pythonpath = .` — without it, running the bare `pytest`
+  console script (as opposed to `python -m pytest`) doesn't put the repo
+  root on `sys.path`, since `tests/` has no `__init__.py` for pytest's
+  rootdir-walk to climb past; `tests/conftest.py:3`'s `from app import
+  create_app` then fails with `ModuleNotFoundError: No module named 'app'`.
+  This bit CI specifically, since `.github/workflows/ci.yml` invokes plain
+  `pytest`, not `python -m pytest`.
 
 ## Conventions
 

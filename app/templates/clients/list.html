@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Clients - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+    <div>
+        <h1 class="h3 fw-bold mb-1">Clients</h1>
+        <p class="text-secondary-custom mb-0">{{ clients|length }} client{{ '' if clients|length == 1 else 's' }}</p>
+    </div>
+    <a href="{{ url_for('clients.create') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> New client
+    </a>
+</div>
+
+<form method="get" class="mb-3" style="max-width: 360px;">
+    <div class="input-group">
+        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+        <input type="search" name="q" class="form-control" placeholder="Search name, phone, or email" value="{{ q }}">
+    </div>
+</form>
+
+{% if clients %}
+<div class="table-responsive">
+    <table class="table table-sds mb-0">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Language</th>
+                <th>Notifications</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+            <tr>
+                <td><a href="{{ url_for('clients.view', client_id=client.id) }}" class="fw-semibold">{{ client.name }}</a></td>
+                <td>{{ client.phone or '—' }}</td>
+                <td>{{ client.email or '—' }}</td>
+                <td class="text-uppercase">{{ client.preferred_language }}</td>
+                <td>
+                    {% if client.consent_notifications %}
+                        <span class="badge-soft badge-soft-success"><i class="bi bi-check-circle"></i> Opted in</span>
+                    {% else %}
+                        <span class="badge-soft badge-soft-secondary">Opted out</span>
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    <a href="{{ url_for('clients.view', client_id=client.id) }}" class="btn btn-sm btn-outline-secondary">View</a>
+                    <a href="{{ url_for('clients.edit', client_id=client.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card-sds">
+    <div class="empty-state">
+        <img src="{{ url_for('static', filename='images/empty-state.svg') }}" alt="" width="140" height="105">
+        <h2 class="h5">{{ 'No clients match your search' if q else 'No clients yet' }}</h2>
+        <p class="mb-3">{{ 'Try a different name, phone, or email.' if q else 'Add your first client to get started.' }}</p>
+        {% if not q %}
+        <a href="{{ url_for('clients.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> New client
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

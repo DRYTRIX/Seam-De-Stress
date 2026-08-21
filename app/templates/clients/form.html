@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit client' if client else 'New client' }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('clients.list_clients') }}" class="text-secondary-custom small"><i class="bi bi-arrow-left"></i> Back to clients</a>
+    <h1 class="h3 fw-bold mt-1 mb-0">{{ 'Edit ' + client.name if client else 'New client' }}</h1>
+</div>
+
+<div class="card-sds p-4" style="max-width: 640px;">
+    <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.name.label(class_="form-label") }}
+            {{ form.name(class_="form-control" + (" is-invalid" if form.name.errors else ""), autofocus=true) }}
+            {% for error in form.name.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.phone.label(class_="form-label") }}
+                {{ form.phone(class_="form-control" + (" is-invalid" if form.phone.errors else "")) }}
+                {% for error in form.phone.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.email.label(class_="form-label") }}
+                {{ form.email(class_="form-control" + (" is-invalid" if form.email.errors else "")) }}
+                {% for error in form.email.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            {{ form.address.label(class_="form-label") }}
+            {{ form.address(class_="form-control", rows=2) }}
+        </div>
+
+        <div class="mb-3" style="max-width: 220px;">
+            {{ form.preferred_language.label(class_="form-label") }}
+            {{ form.preferred_language(class_="form-select") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.notes.label(class_="form-label") }}
+            {{ form.notes(class_="form-control", rows=3) }}
+        </div>
+
+        <div class="form-check mb-4">
+            {{ form.consent_notifications(class_="form-check-input") }}
+            {{ form.consent_notifications.label(class_="form-check-label") }}
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">{{ 'Save changes' if client else 'Create client' }}</button>
+            <a href="{{ url_for('clients.list_clients') }}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

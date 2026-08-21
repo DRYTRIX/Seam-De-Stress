@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}{{ item.name }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+    <div>
+        <a href="{{ url_for('inventory.list_items') }}" class="text-secondary-custom small"><i class="bi bi-arrow-left"></i> Back to inventory</a>
+        <h1 class="h3 fw-bold mt-1 mb-1">
+            {{ item.name }}
+            {% if item.is_low_stock %}<span class="badge-soft badge-soft-danger"><i class="bi bi-exclamation-triangle"></i> Low stock</span>{% endif %}
+            {% if not item.active %}<span class="badge-soft badge-soft-secondary">Inactive</span>{% endif %}
+        </h1>
+        <p class="mb-0 text-secondary-custom">
+            <span class="badge-soft badge-soft-info">{{ inventory_category_label(item.category) }}</span>
+            {% if item.sku %}&middot; {{ item.sku }}{% endif %}
+        </p>
+    </div>
+    {% if current_user.is_admin %}
+    <a href="{{ url_for('inventory.edit', item_id=item.id) }}" class="btn btn-outline-secondary">Edit material</a>
+    {% endif %}
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon tint-primary"><i class="bi bi-boxes"></i></div>
+            <div>
+                <div class="stat-value">{{ item.quantity_on_hand }} {{ inventory_unit_label(item.unit) }}</div>
+                <div class="stat-label">On hand</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon tint-accent"><i class="bi bi-cash"></i></div>
+            <div>
+                <div class="stat-value">&euro;{{ "%.2f"|format(item.default_price) }}</div>
+                <div class="stat-label">Default price ({{ "%.0f"|format(item.default_vat_rate) }}% VAT)</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon tint-info"><i class="bi bi-exclamation-triangle"></i></div>
+            <div>
+                <div class="stat-value">{{ item.effective_low_stock_threshold }} {{ inventory_unit_label(item.unit) }}</div>
+                <div class="stat-label">Low-stock threshold{{ ' (shop default)' if item.low_stock_threshold is none else '' }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if item.description %}
+<div class="card-sds p-3 mb-4">
+    <div class="eyebrow mb-1">Description</div>
+    <p class="mb-0">{{ item.description }}</p>
+</div>
+{% endif %}
+
+{% if current_user.is_admin %}
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card-sds p-4 h-100">
+            <div class="eyebrow mb-2">Receive stock</div>
+            <form method="post" action="{{ url_for('inventory.receive', item_id=item.id) }}" class="row g-2 align-items-end">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="col-6">
+                    {{ receive_form.quantity.label(class_="form-label small mb-1") }}
+                    {{ receive_form.quantity(class_="form-control form-control-sm") }}
+                </div>
+                <div class="col-6">
+                    {{ receive_form.note.label(class_="form-label small mb-1") }}
+                    {{ receive_form.note(class_="form-control form-control-sm") }}
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i> Receive</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card-sds p-4 h-100">
+            <div class="eyebrow mb-2">Adjust stock</div>
+            <form method="post" action="{{ url_for('inventory.adjust', item_id=item.id) }}" class="row g-2 align-items-end">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="col-4">
+                    {{ adjust_form.quantity_delta.label(class_="form-label small mb-1") }}
+                    {{ adjust_form.quantity_delta(class_="form-control form-control-sm") }}
+                </div>
+                <div class="col-4">
+                    {{ adjust_form.reason.label(class_="form-label small mb-1") }}
+                    {{ adjust_form.reason(class_="form-select form-select-sm") }}
+                </div>
+                <div class="col-4">
+                    {{ adjust_form.note.label(class_="form-label small mb-1") }}
+                    {{ adjust_form.note(class_="form-control form-control-sm") }}
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-sliders me-1"></i> Adjust</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<h2 class="h5 fw-bold mb-3">Stock history</h2>
+{% if movements %}
+<div class="table-responsive">
+    <table class="table table-sds mb-0">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Reason</th>
+                <th>Change</th>
+                <th>Order</th>
+                <th>Note</th>
+                <th>By</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for movement in movements %}
+            <tr>
+                <td>{{ movement.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td><span class="badge-soft badge-soft-{{ stock_movement_reason_badge(movement.reason) }}">{{ stock_movement_reason_label(movement.reason) }}</span></td>
+                <td class="{{ 'text-success' if movement.quantity_delta > 0 else 'text-danger' }}">
+                    {{ '+' if movement.quantity_delta > 0 }}{{ movement.quantity_delta }}
+                </td>
+                <td>
+                    {% if movement.order_line and movement.order_line.garment %}
+                    <a href="{{ url_for('orders.view', order_id=movement.order_line.garment.order_id) }}">{{ movement.order_line.garment.order.code }}</a>
+                    {% endif %}
+                </td>
+                <td class="small text-secondary-custom">{{ movement.note or '' }}</td>
+                <td class="small text-secondary-custom">{{ movement.created_by.full_name if movement.created_by else '' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card-sds">
+    <div class="empty-state">
+        <img src="{{ url_for('static', filename='images/empty-state.svg') }}" alt="" width="140" height="105">
+        <h2 class="h5">No stock movements yet</h2>
+        <p class="mb-0">Receive stock or use this material on an order to see history here.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

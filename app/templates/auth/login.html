@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ _('Sign in') }} - {{ app_name }}{% endblock %}
+
+{% block body %}
+<div class="auth-shell">
+    <div class="auth-card">
+        <div class="auth-brand-panel">
+            <div class="brand-mark">
+                <img src="{{ url_for('static', filename='images/logo-icon.svg') }}" alt="" width="32" height="32">
+            </div>
+            <div>
+                <h1 class="h3 fw-bold mb-1">Seam(De)Stress</h1>
+                <p class="mb-0" style="opacity:.9;">{{ _('Order management & destressing for your alterations shop.') }}</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+                <span class="feature-pill"><i class="bi bi-calendar-check"></i> {{ _('Workload planning') }}</span>
+                <span class="feature-pill"><i class="bi bi-receipt"></i> {{ _('Quotes & invoices') }}</span>
+                <span class="feature-pill"><i class="bi bi-qr-code"></i> {{ _('Client tracking') }}</span>
+            </div>
+        </div>
+
+        <div class="auth-form-panel">
+            <h2 class="h4 fw-bold mb-1">{{ _('Sign in') }}</h2>
+            <p class="text-secondary-custom mb-4">{{ _('Staff and admin access only.') }}</p>
+
+            {% include "partials/flashes.html" %}
+
+            <form method="post" novalidate>
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    {{ form.username.label(class_="form-label") }}
+                    {{ form.username(class_="form-control" + (" is-invalid" if form.username.errors else ""), autofocus=true, placeholder=_('e.g. admin')) }}
+                    {% for error in form.username.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.password.label(class_="form-label") }}
+                    {{ form.password(class_="form-control" + (" is-invalid" if form.password.errors else "")) }}
+                    {% for error in form.password.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                </div>
+
+                <div class="form-check mb-4">
+                    {{ form.remember_me(class_="form-check-input") }}
+                    {{ form.remember_me.label(class_="form-check-label") }}
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2">{{ _('Sign in') }}</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ _('My account') }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3 fw-bold mb-1">{{ _('My account') }}</h1>
+    <p class="text-secondary-custom mb-0">{{ current_user.username }} &middot; {{ current_user.role }}</p>
+</div>
+
+<div class="card-sds p-4" style="max-width: 480px;">
+    <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.full_name.label(class_="form-label") }}
+            {{ form.full_name(class_="form-control" + (" is-invalid" if form.full_name.errors else "")) }}
+            {% for error in form.full_name.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3" style="max-width: 220px;">
+            {{ form.preferred_language.label(class_="form-label") }}
+            {{ form.preferred_language(class_="form-select") }}
+            <div class="form-text">{{ _('Changes the language of this dashboard.') }}</div>
+        </div>
+
+        <div class="mb-4">
+            {{ form.new_password.label(class_="form-label") }}
+            {{ form.new_password(class_="form-control" + (" is-invalid" if form.new_password.errors else "")) }}
+            {% for error in form.new_password.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+            <div class="form-text">{{ _('Leave blank to keep your current password.') }}</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">{{ _('Save changes') }}</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ _('Link not found') }} - {{ app_name }}{% endblock %}
+{% block body %}
+<div class="auth-shell">
+    <div class="card-sds empty-state" style="max-width: 440px;">
+        <img src="{{ url_for('static', filename='images/empty-state.svg') }}" alt="" width="140" height="105">
+        <h1 class="h4">{{ _("This tracking link isn't valid") }}</h1>
+        <p class="mb-0">{{ _('It may have expired or been replaced with a new one. Please contact the shop for an up-to-date link.') }}</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}{{ order.code }} - {{ settings.company_name or app_name }}{% endblock %}
+
+{% block body %}
+<div class="auth-shell" style="align-items: flex-start; padding-top: 2rem; padding-bottom: 2rem;">
+    <div style="width: 100%; max-width: 560px;">
+        <div class="d-flex align-items-center gap-2 justify-content-center mb-4">
+            <img src="{{ url_for('static', filename='images/logo-icon.svg') }}" alt="" width="36" height="36">
+            <span class="h5 fw-bold mb-0">{{ settings.company_name or app_name }}</span>
+        </div>
+
+        {% if order.status == 'ready' %}
+        <div class="card-sds p-3 mb-3 text-center" style="background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.3);">
+            <div class="fw-bold text-success"><i class="bi bi-check-circle me-1"></i> {{ _('Ready for pickup!') }}</div>
+        </div>
+        {% elif order.status == 'cancelled' %}
+        <div class="card-sds p-3 mb-3 text-center" style="background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.25);">
+            <div class="fw-bold text-danger">{{ _('This order was cancelled.') }}</div>
+        </div>
+        {% endif %}
+
+        <div class="card-sds p-4 mb-3">
+            <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+                <div>
+                    <div class="eyebrow mb-1">{{ _('Order') }}</div>
+                    <div class="h5 fw-bold mb-0">{{ order.code }}</div>
+                </div>
+                <span class="badge-soft badge-soft-{{ order_status_badge(order.status) }} fs-6">{{ order_status_label(order.status) }}</span>
+            </div>
+
+            {% if order.status != 'cancelled' %}
+            <div class="d-flex justify-content-between mb-2" style="max-width: 100%;">
+                {% set steps = ['received', 'in_progress', 'ready', 'picked_up'] %}
+                {% set current_index = steps.index(order.status) if order.status in steps else -1 %}
+                {% for step in steps %}
+                {% set reached = current_index >= loop.index0 %}
+                <div class="text-center flex-fill">
+                    <div class="mx-auto mb-1 d-flex align-items-center justify-content-center"
+                         style="width: 1.75rem; height: 1.75rem; border-radius: 50%; font-size: 0.75rem;
+                                background: {{ 'var(--sds-primary)' if reached else 'var(--sds-border)' }};
+                                color: {{ '#fff' if reached else 'var(--sds-text-muted)' }};">
+                        {{ loop.index }}
+                    </div>
+                    <div class="small {{ 'fw-semibold' if reached else 'text-muted-custom' }}">{{ order_status_label(step) }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <hr>
+            <p class="mb-0 small text-secondary-custom">
+                {{ _('Promised date:') }} {{ order.promised_date.strftime('%d/%m/%Y') if order.promised_date else _('to be confirmed') }}
+                {% if order.express %}&middot; <span class="text-warning fw-semibold">{{ _('Express') }}</span>{% endif %}
+            </p>
+        </div>
+
+        <div class="card-sds p-4 mb-3">
+            <div class="eyebrow mb-3">{{ _('Garments') }}</div>
+            {% for garment in order.garments %}
+            <div class="mb-3 {{ 'pb-3 border-bottom' if not loop.last }}">
+                <div class="fw-semibold">
+                    {{ garment_type_label(garment.garment_type) }}
+                    {% if garment.color %}&middot; {{ garment.color }}{% endif %}
+                </div>
+                <ul class="list-unstyled small mb-0 mt-1">
+                    {% for line in garment.lines %}
+                    <li class="d-flex justify-content-between">
+                        <span>{{ line.description }}{{ ' x' + line.quantity|string if line.quantity > 1 }}</span>
+                        {% if settings.portal_show_prices %}<span>&euro;{{ "%.2f"|format(line.line_total_with_vat) }}</span>{% endif %}
+                    </li>
+                    {% else %}
+                    <li class="text-secondary-custom">{{ _('Alterations to be confirmed.') }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+
+            {% if settings.portal_show_prices %}
+            <div class="d-flex justify-content-between fw-bold pt-2 border-top">
+                <span>{{ _('Total (incl. VAT)') }}</span>
+                <span>&euro;{{ "%.2f"|format(order.total) }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if settings.company_address or settings.company_phone or settings.opening_hours %}
+        <div class="card-sds p-4 text-center small text-secondary-custom">
+            {% if settings.company_address %}<div>{{ settings.company_address }}</div>{% endif %}
+            {% if settings.company_phone %}<div>{{ settings.company_phone }}</div>{% endif %}
+            {% if settings.opening_hours %}<div>{{ settings.opening_hours }}</div>{% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}{{ invoice.invoice_number }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+    <div>
+        <a href="{{ url_for('invoices.list_invoices') }}" class="text-secondary-custom small"><i class="bi bi-arrow-left"></i> Back to invoices</a>
+        <h1 class="h3 fw-bold mt-1 mb-1">{{ invoice.invoice_number }}</h1>
+        <p class="mb-0">
+            <a href="{{ url_for('clients.view', client_id=invoice.client.id) }}">{{ invoice.client.name }}</a>
+            &middot; Issued {{ invoice.issue_date.strftime('%d/%m/%Y') }}
+            {% if invoice.due_date %}&middot; Due {{ invoice.due_date.strftime('%d/%m/%Y') }}{% endif %}
+        </p>
+    </div>
+    <a href="{{ url_for('invoices.pdf', invoice_id=invoice.id) }}" class="btn btn-outline-secondary" target="_blank">
+        <i class="bi bi-file-earmark-pdf me-1"></i> Download PDF
+    </a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card-sds p-4 h-100">
+            <div class="eyebrow mb-1">Status</div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="badge-soft badge-soft-{{ invoice_status_badge(invoice.status) }} fs-6">{{ invoice_status_label(invoice.status) }}</span>
+                <form method="post" action="{{ url_for('invoices.update_status', invoice_id=invoice.id) }}" class="d-flex gap-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <select name="status" class="form-select form-select-sm">
+                        {% for value, label in [('draft','Draft'), ('sent','Sent'), ('paid','Paid'), ('overdue','Overdue')] %}
+                        <option value="{{ value }}" {{ 'selected' if invoice.status == value }}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="stat-card h-100">
+            <div class="stat-icon tint-primary"><i class="bi bi-cash"></i></div>
+            <div>
+                <div class="stat-value">&euro;{{ "%.2f"|format(invoice.total) }}</div>
+                <div class="stat-label">Total (incl. VAT &euro;{{ "%.2f"|format(invoice.vat_total) }})</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-sds p-4 mb-3">
+    <div class="eyebrow mb-3">Orders on this invoice</div>
+    <ul class="list-unstyled mb-0 small">
+        {% for order in invoice.orders %}
+        <li class="py-1 border-bottom"><a href="{{ url_for('orders.view', order_id=order.id) }}">{{ order.code }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="card-sds p-4 mb-3">
+    <div class="eyebrow mb-3">Line items</div>
+    <div class="table-responsive">
+        <table class="table table-sds mb-0">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Qty</th>
+                    <th>Unit price</th>
+                    <th>VAT</th>
+                    <th class="text-end">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in invoice.lines %}
+                <tr>
+                    <td>{{ line.description }}</td>
+                    <td>{{ line.quantity }}</td>
+                    <td>&euro;{{ "%.2f"|format(line.unit_price) }}</td>
+                    <td>{{ "%.0f"|format(line.vat_rate) }}%</td>
+                    <td class="text-end">&euro;{{ "%.2f"|format(line.line_total_with_vat) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card-sds p-4" style="max-width: 360px; margin-left: auto;">
+    <div class="eyebrow mb-2">VAT breakdown</div>
+    {% for rate, amounts in invoice.vat_breakdown.items() %}
+    <div class="d-flex justify-content-between small mb-1">
+        <span>{{ "%.0f"|format(rate) }}% on &euro;{{ "%.2f"|format(amounts.subtotal) }}</span>
+        <span>&euro;{{ "%.2f"|format(amounts.vat_amount) }}</span>
+    </div>
+    {% endfor %}
+    <hr>
+    <div class="d-flex justify-content-between small">
+        <span>Subtotal</span>
+        <span>&euro;{{ "%.2f"|format(invoice.subtotal) }}</span>
+    </div>
+    <div class="d-flex justify-content-between fw-bold">
+        <span>Total</span>
+        <span>&euro;{{ "%.2f"|format(invoice.total) }}</span>
+    </div>
+</div>
+{% endblock %}

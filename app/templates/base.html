@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="{{ get_locale() }}" data-bs-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ app_name }}{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo-icon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    {% block body %}
+    <div class="app-shell">
+        <div class="d-none d-lg-block" style="width: 0;"></div>
+        <div class="sidebar" data-sidebar>
+            {% include "partials/sidebar.html" %}
+        </div>
+        <div class="d-lg-none d-none" data-sidebar-backdrop
+             style="position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:1025;"></div>
+
+        <div class="flex-grow-1 d-flex flex-column" style="min-width:0;">
+            {% include "partials/topbar.html" %}
+
+            <main class="main-content">
+                {% include "partials/flashes.html" %}
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    {% endblock %}
+
+    <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts_extra %}{% endblock %}
+</body>
+</html>

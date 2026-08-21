@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Orders - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+    <div>
+        <h1 class="h3 fw-bold mb-1">Orders</h1>
+        <p class="text-secondary-custom mb-0">{{ orders|length }} order{{ '' if orders|length == 1 else 's' }}</p>
+    </div>
+    <a href="{{ url_for('orders.create') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> New order
+    </a>
+</div>
+
+<div class="d-flex flex-wrap gap-3 mb-3 align-items-center">
+    <form method="get" class="d-flex gap-2 flex-wrap">
+        <input type="search" name="q" class="form-control form-control-sm" placeholder="Order code or client" value="{{ q }}" style="width: 220px;">
+        <select name="status" class="form-select form-select-sm" style="width: 180px;" onchange="this.form.submit()">
+            <option value="">All statuses</option>
+            {% for value, label in statuses %}
+            <option value="{{ value }}" {{ 'selected' if status == value }}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+    </form>
+</div>
+
+{% if orders %}
+<div class="table-responsive">
+    <table class="table table-sds mb-0">
+        <thead>
+            <tr>
+                <th>Order</th>
+                <th>Client</th>
+                <th>Promised</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th class="text-end">Total</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('orders.view', order_id=order.id) }}" class="fw-semibold">{{ order.code }}</a>
+                    {% if order.express %}<span class="badge-soft badge-soft-warning ms-1"><i class="bi bi-lightning-charge"></i> Express</span>{% endif %}
+                </td>
+                <td>{{ order.client.name }}</td>
+                <td>
+                    {{ order.promised_date.strftime('%d/%m/%Y') if order.promised_date else '—' }}
+                    {% if order.is_overdue %}<span class="badge-soft badge-soft-danger ms-1">Overdue</span>{% endif %}
+                </td>
+                <td><span class="badge-soft badge-soft-{{ order_status_badge(order.status) }}">{{ order_status_label(order.status) }}</span></td>
+                <td><span class="badge-soft badge-soft-{{ payment_status_badge(order.payment_status) }}">{{ payment_status_label(order.payment_status) }}</span></td>
+                <td class="text-end">&euro;{{ "%.2f"|format(order.total) }}</td>
+                <td class="text-end">
+                    <a href="{{ url_for('orders.view', order_id=order.id) }}" class="btn btn-sm btn-outline-secondary">Open</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card-sds">
+    <div class="empty-state">
+        <img src="{{ url_for('static', filename='images/empty-state.svg') }}" alt="" width="140" height="105">
+        <h2 class="h5">No orders{{ ' match your filters' if (q or status) else ' yet' }}</h2>
+        <p class="mb-3">{{ 'Try clearing the search or status filter.' if (q or status) else 'Start an intake to create the first order.' }}</p>
+        {% if not q and not status %}
+        <a href="{{ url_for('orders.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> New order</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

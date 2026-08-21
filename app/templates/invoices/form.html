@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}New invoice - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('invoices.list_invoices') }}" class="text-secondary-custom small"><i class="bi bi-arrow-left"></i> Back to invoices</a>
+    <h1 class="h3 fw-bold mt-1 mb-0">New invoice</h1>
+</div>
+
+<div class="card-sds p-4 mb-3" style="max-width: 560px;">
+    <form method="get">
+        <label class="form-label">Client</label>
+        <div class="d-flex gap-2">
+            <select name="client_id" class="form-select">
+                <option value="">Select a client&hellip;</option>
+                {% for c in clients %}
+                <option value="{{ c.id }}" {{ 'selected' if selected_client and selected_client.id == c.id }}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-outline-secondary">Load orders</button>
+        </div>
+    </form>
+</div>
+
+{% if selected_client %}
+<div class="card-sds p-4" style="max-width: 720px;">
+    <div class="eyebrow mb-3">Uninvoiced orders for {{ selected_client.name }}</div>
+
+    {% if eligible_orders %}
+    <form method="post">
+        {{ form.hidden_tag() }}
+        <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+
+        <div class="table-responsive mb-3">
+            <table class="table table-sds mb-0">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Order</th>
+                        <th>Intake</th>
+                        <th>Status</th>
+                        <th class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in eligible_orders %}
+                    <tr>
+                        <td><input type="checkbox" name="order_ids" value="{{ order.id }}" class="form-check-input" checked></td>
+                        <td><a href="{{ url_for('orders.view', order_id=order.id) }}" target="_blank">{{ order.code }}</a></td>
+                        <td>{{ order.intake_date.strftime('%d/%m/%Y') }}</td>
+                        <td><span class="badge-soft badge-soft-{{ order_status_badge(order.status) }}">{{ order_status_label(order.status) }}</span></td>
+                        <td class="text-end">&euro;{{ "%.2f"|format(order.total) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.due_date.label(class_="form-label") }}
+                {{ form.due_date(class_="form-control", type="date") }}
+            </div>
+        </div>
+        <div class="mb-4">
+            {{ form.notes.label(class_="form-label") }}
+            {{ form.notes(class_="form-control", rows=2) }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create invoice</button>
+    </form>
+    {% else %}
+    <p class="text-secondary-custom mb-0">No uninvoiced orders for this client.</p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

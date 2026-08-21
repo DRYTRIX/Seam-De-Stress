@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Inventory - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+    <div>
+        <h1 class="h3 fw-bold mb-1">Inventory</h1>
+        <p class="text-secondary-custom mb-0">{{ items|length }} item{{ '' if items|length == 1 else 's' }}</p>
+    </div>
+    {% if current_user.is_admin %}
+    <a href="{{ url_for('inventory.create') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> New material
+    </a>
+    {% endif %}
+</div>
+
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <a href="{{ url_for('inventory.list_items') }}" class="badge-soft {{ 'badge-soft-primary' if not selected_category and not low_only else 'badge-soft-secondary' }}">All</a>
+    {% for value, label in categories %}
+    <a href="{{ url_for('inventory.list_items', category=value, low_stock='1' if low_only else none) }}" class="badge-soft {{ 'badge-soft-primary' if selected_category == value else 'badge-soft-secondary' }}">{{ inventory_category_label(value) }}</a>
+    {% endfor %}
+    <a href="{{ url_for('inventory.list_items', category=selected_category, low_stock='1' if not low_only else none) }}" class="badge-soft {{ 'badge-soft-danger' if low_only else 'badge-soft-secondary' }}">
+        <i class="bi bi-exclamation-triangle"></i> Low stock
+    </a>
+</div>
+
+{% if items %}
+<div class="table-responsive">
+    <table class="table table-sds mb-0">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Unit price</th>
+                <th>VAT</th>
+                <th>On hand</th>
+                <th>Status</th>
+                {% if current_user.is_admin %}<th class="text-end">Actions</th>{% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('inventory.view', item_id=item.id) }}" class="fw-semibold text-decoration-none">{{ item.name }}</a>
+                    {% if item.sku %}<div class="small text-secondary-custom">{{ item.sku }}</div>{% endif %}
+                </td>
+                <td><span class="badge-soft badge-soft-info">{{ inventory_category_label(item.category) }}</span></td>
+                <td>&euro;{{ "%.2f"|format(item.default_price) }}</td>
+                <td>{{ "%.0f"|format(item.default_vat_rate) }}%</td>
+                <td>
+                    {{ item.quantity_on_hand }} {{ inventory_unit_label(item.unit) }}
+                    {% if item.is_low_stock %}<span class="badge-soft badge-soft-danger ms-1">Low stock</span>{% endif %}
+                </td>
+                <td>
+                    {% if item.active %}
+                        <span class="badge-soft badge-soft-success">Active</span>
+                    {% else %}
+                        <span class="badge-soft badge-soft-secondary">Inactive</span>
+                    {% endif %}
+                </td>
+                {% if current_user.is_admin %}
+                <td class="text-end">
+                    <a href="{{ url_for('inventory.view', item_id=item.id) }}" class="btn btn-sm btn-outline-secondary">Stock</a>
+                    <a href="{{ url_for('inventory.edit', item_id=item.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    <form method="post" action="{{ url_for('inventory.toggle_active', item_id=item.id) }}" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="category" value="{{ selected_category }}">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">{{ 'Deactivate' if item.active else 'Activate' }}</button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card-sds">
+    <div class="empty-state">
+        <img src="{{ url_for('static', filename='images/empty-state.svg') }}" alt="" width="140" height="105">
+        <h2 class="h5">No materials{{ ' in this category' if selected_category else '' }}</h2>
+        <p class="mb-0">{{ 'Run `flask seed` to load example materials, or add one manually.' if not selected_category else 'Try a different category.' }}</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

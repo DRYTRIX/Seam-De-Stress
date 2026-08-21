@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+{% block title %}{{ order.code }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+    <div>
+        <a href="{{ url_for('orders.list_orders') }}" class="text-secondary-custom small"><i class="bi bi-arrow-left"></i> Back to orders</a>
+        <h1 class="h3 fw-bold mt-1 mb-1">
+            {{ order.code }}
+            {% if order.express %}<span class="badge-soft badge-soft-warning"><i class="bi bi-lightning-charge"></i> Express</span>{% endif %}
+            {% if order.is_overdue %}<span class="badge-soft badge-soft-danger">Overdue</span>{% endif %}
+            {% if order.invoice_id and current_user.is_admin %}
+            <a href="{{ url_for('invoices.view', invoice_id=order.invoice_id) }}" class="badge-soft badge-soft-primary">
+                <i class="bi bi-receipt"></i> {{ order.invoice.invoice_number }}
+            </a>
+            {% endif %}
+        </h1>
+        <p class="mb-0">
+            <a href="{{ url_for('clients.view', client_id=order.client.id) }}">{{ order.client.name }}</a>
+            &middot; Intake {{ order.intake_date.strftime('%d/%m/%Y') }}
+            &middot; Promised {{ order.promised_date.strftime('%d/%m/%Y') if order.promised_date else 'not set' }}
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('orders.receipt', order_id=order.id) }}" class="btn btn-outline-secondary" target="_blank">
+            <i class="bi bi-receipt me-1"></i> Receipt
+        </a>
+        <a href="{{ url_for('orders.order_tickets', order_id=order.id) }}" class="btn btn-outline-secondary" target="_blank">
+            <i class="bi bi-printer me-1"></i> Print tickets
+        </a>
+        {% if not order.invoice_id and order.status != 'cancelled' and current_user.is_admin %}
+        <a href="{{ url_for('invoices.create', client_id=order.client.id) }}" class="btn btn-outline-secondary">
+            <i class="bi bi-plus-lg me-1"></i> Invoice
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-lg-8">
+        <div class="card-sds p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <div class="eyebrow mb-1">Status</div>
+                    <span class="badge-soft badge-soft-{{ order_status_badge(order.status) }} fs-6">{{ order_status_label(order.status) }}</span>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    {% if next_status %}
+                    <form method="post" action="{{ url_for('orders.update_status', order_id=order.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="status" value="{{ next_status }}">
+                        <button type="submit" class="btn btn-primary btn-sm">Mark as {{ order_status_label(next_status) }}</button>
+                    </form>
+                    {% endif %}
+                    {% if order.status not in ('picked_up', 'cancelled') %}
+                    <form method="post" action="{{ url_for('orders.update_status', order_id=order.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="status" value="cancelled">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Cancel order</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card-sds p-4">
+            <div class="eyebrow mb-1">Payment</div>
+            <form method="post" action="{{ url_for('orders.update_payment_status', order_id=order.id) }}" class="d-flex gap-2">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <select name="payment_status" class="form-select form-select-sm">
+                    {% for value, label in [('unpaid','Unpaid'), ('partially_paid','Partially paid'), ('paid','Paid')] %}
+                    <option value="{{ value }}" {{ 'selected' if order.payment_status == value }}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-outline-secondary btn-sm">Update</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% if order.status not in ('cancelled',) %}
+<div class="row g-3 mb-3">
+    <div class="col-lg-8">
+        <div class="card-sds p-4 h-100">
+            <div class="eyebrow mb-2">Client portal</div>
+            {% if order.portal_active %}
+            {% set portal_url = url_for('portal.view', token=order.portal_token, _external=True) %}
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <input type="text" id="portal-url-{{ order.id }}" class="form-control form-control-sm" value="{{ portal_url }}" readonly style="max-width: 360px;">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-target="#portal-url-{{ order.id }}">
+                    <i class="bi bi-clipboard"></i> Copy
+                </button>
+                <a href="{{ portal_url }}" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-box-arrow-up-right"></i> Open</a>
+                <form method="post" action="{{ url_for('orders.revoke_portal', order_id=order.id) }}" onsubmit="return confirm('Revoke this client\'s tracking link? They will no longer be able to view it.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Revoke</button>
+                </form>
+            </div>
+            <p class="small text-secondary-custom mb-0 mt-2">No login required. Also printed as a QR code on the client receipt.</p>
+            {% else %}
+            <p class="small text-secondary-custom mb-2">{{ 'This link has been revoked.' if order.portal_token else 'No tracking link yet.' }}</p>
+            <form method="post" action="{{ url_for('orders.regenerate_portal', order_id=order.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-primary">{{ 'Generate new link' if order.portal_token else 'Generate link' }}</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card-sds p-4 h-100">
+            <div class="eyebrow mb-2">Notify client</div>
+            {% if not order.client.consent_notifications %}
+            <p class="small text-secondary-custom mb-0">{{ order.client.name }} has opted out of notifications.</p>
+            {% elif not order.client.email %}
+            <p class="small text-secondary-custom mb-0">No email address on file for {{ order.client.name }}.</p>
+            {% else %}
+            <form method="post" action="{{ url_for('orders.notify_client', order_id=order.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-envelope me-1"></i> Email {{ order.client.name }}
+                </button>
+            </form>
+            {% endif %}
+            {% if order.notifications %}
+            <ul class="list-unstyled small mb-0 mt-2">
+                {% for log in order.notifications[:3] %}
+                <li class="text-secondary-custom">
+                    {{ log.created_at.strftime('%d/%m %H:%M') }} &middot;
+                    <span class="badge-soft badge-soft-{{ 'success' if log.status == 'sent' else 'danger' }}">{{ log.status }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon tint-primary"><i class="bi bi-cash"></i></div>
+            <div>
+                <div class="stat-value">&euro;{{ "%.2f"|format(order.total) }}</div>
+                <div class="stat-label">Total (incl. VAT &euro;{{ "%.2f"|format(order.vat_total) }})</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon tint-accent"><i class="bi bi-stopwatch"></i></div>
+            <div>
+                <div class="stat-value">{{ order.total_estimated_minutes }}</div>
+                <div class="stat-label">Estimated minutes</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon tint-info"><i class="bi bi-bag"></i></div>
+            <div>
+                <div class="stat-value">{{ order.garments|length }}</div>
+                <div class="stat-label">Garment{{ '' if order.garments|length == 1 else 's' }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if order.internal_notes %}
+<div class="card-sds p-3 mb-4">
+    <div class="eyebrow mb-1">Internal notes</div>
+    <p class="mb-0" style="white-space: pre-wrap;">{{ order.internal_notes }}</p>
+</div>
+{% endif %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h5 fw-bold mb-0">Garments</h2>
+    <a href="{{ url_for('orders.create_garment', order_id=order.id) }}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i> Add garment
+    </a>
+</div>
+
+{% if not order.garments %}
+<div class="card-sds">
+    <div class="empty-state">
+        <img src="{{ url_for('static', filename='images/empty-state.svg') }}" alt="" width="140" height="105">
+        <h2 class="h5">No garments yet</h2>
+        <p class="mb-3">Add the first garment to start building this order.</p>
+        <a href="{{ url_for('orders.create_garment', order_id=order.id) }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Add garment</a>
+    </div>
+</div>
+{% endif %}
+
+{% for garment in order.garments %}
+<div class="card-sds p-4 mb-3">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div>
+            <span class="badge-soft badge-soft-info">{{ garment_type_label(garment.garment_type) }}</span>
+            {% if garment.color %}<span class="text-secondary-custom ms-2">{{ garment.color }}</span>{% endif %}
+            {% if garment.brand %}<span class="text-secondary-custom ms-2">&middot; {{ garment.brand }}</span>{% endif %}
+            {% if garment.description %}<p class="mb-0 mt-1">{{ garment.description }}</p>{% endif %}
+            {% if garment.measurements_notes %}<p class="mb-0 mt-1 small text-secondary-custom">{{ garment.measurements_notes }}</p>{% endif %}
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('orders.garment_ticket', order_id=order.id, garment_id=garment.id) }}" class="btn btn-sm btn-outline-secondary" target="_blank">
+                <i class="bi bi-tag"></i> Ticket
+            </a>
+            <a href="{{ url_for('orders.edit_garment', order_id=order.id, garment_id=garment.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+            <form method="post" action="{{ url_for('orders.delete_garment', order_id=order.id, garment_id=garment.id) }}" onsubmit="return confirm('Remove this garment and all its alterations?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+            </form>
+        </div>
+    </div>
+
+    {% if garment.photos %}
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        {% for photo in garment.photos %}
+        <a href="{{ url_for('main.uploaded_file', filename=photo.filename) }}" target="_blank">
+            <img src="{{ url_for('main.uploaded_file', filename=photo.thumbnail_filename) }}" alt="" width="72" height="72" style="object-fit: cover; border-radius: 0.5rem; border: 1px solid var(--sds-border);">
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if garment.lines %}
+    <div class="table-responsive mb-3">
+        <table class="table table-sds mb-0">
+            <thead>
+                <tr>
+                    <th>Alteration</th>
+                    <th>Qty</th>
+                    <th>Unit price</th>
+                    <th>VAT</th>
+                    <th class="text-end">Total</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in garment.lines %}
+                <tr>
+                    <td>
+                        {% if line.inventory_item_id %}<span class="badge-soft badge-soft-info me-1"><i class="bi bi-boxes"></i></span>{% endif %}
+                        {{ line.description }}
+                        {% if line.notes %}<div class="small text-secondary-custom">{{ line.notes }}</div>{% endif %}
+                    </td>
+                    <td>{{ line.quantity }}</td>
+                    <td>&euro;{{ "%.2f"|format(line.unit_price) }}</td>
+                    <td>{{ "%.0f"|format(line.vat_rate) }}%</td>
+                    <td class="text-end">&euro;{{ "%.2f"|format(line.line_total_with_vat) }}</td>
+                    <td class="text-end">
+                        <a href="{{ url_for('orders.edit_line', order_id=order.id, garment_id=garment.id, line_id=line.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        <form method="post" action="{{ url_for('orders.delete_line', order_id=order.id, garment_id=garment.id, line_id=line.id) }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('orders.create_line', order_id=order.id, garment_id=garment.id) }}" class="border-top pt-3">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Alteration</label>
+                <select name="catalog_item_id" class="form-select form-select-sm" data-role="pricing_select">
+                    <option value="">&mdash; Custom line &mdash;</option>
+                    {% for category, items in catalog_items|groupby('category') %}
+                    <optgroup label="{{ category_label(category) }}">
+                        {% for item in items %}
+                        <option value="{{ item.id }}" data-name="{{ item.name }}" data-price="{{ '%.2f'|format(item.default_price) }}" data-vat="{{ '%.0f'|format(item.default_vat_rate) }}">{{ item.name }}</option>
+                        {% endfor %}
+                    </optgroup>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-1">Material</label>
+                <select name="inventory_item_id" class="form-select form-select-sm" data-role="pricing_select">
+                    <option value="">&mdash; Custom line &mdash;</option>
+                    {% for category, items in inventory_items|groupby('category') %}
+                    <optgroup label="{{ inventory_category_label(category) }}">
+                        {% for item in items %}
+                        <option value="{{ item.id }}" data-name="{{ item.name }}" data-price="{{ '%.2f'|format(item.default_price) }}" data-vat="{{ '%.0f'|format(item.default_vat_rate) }}">{{ item.name }}</option>
+                        {% endfor %}
+                    </optgroup>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Description</label>
+                <input type="text" name="description" class="form-control form-control-sm" data-role="description" required>
+            </div>
+            <div class="col-md-1">
+                <label class="form-label small mb-1">Qty</label>
+                <input type="number" name="quantity" class="form-control form-control-sm" value="1" min="1" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-1">Price (&euro;)</label>
+                <input type="number" name="unit_price" class="form-control form-control-sm" data-role="unit_price" step="0.01" min="0" required>
+            </div>
+            <div class="col-md-1">
+                <label class="form-label small mb-1">VAT %</label>
+                <input type="number" name="vat_rate" class="form-control form-control-sm" data-role="vat_rate" step="0.01" min="0" max="100" value="21">
+            </div>
+            <div class="col-md-12 col-lg-1">
+                <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-plus-lg"></i></button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endfor %}
+{% endblock %}

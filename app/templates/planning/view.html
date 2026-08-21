@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Planning - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+    <div>
+        <h1 class="h3 fw-bold mb-1">Planning</h1>
+        <p class="text-secondary-custom mb-0">
+            Week of {{ week_start.strftime('%d/%m/%Y') }} &middot; capacity {{ capacity_minutes }} min/day
+            {% if current_user.is_admin %}(<a href="{{ url_for('settings.edit') }}">change</a>){% endif %}
+        </p>
+    </div>
+    <div class="btn-group">
+        <a href="{{ url_for('planning.view', week=prev_week) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-chevron-left"></i> Prev</a>
+        <a href="{{ url_for('planning.view', week=this_week) }}" class="btn btn-outline-secondary btn-sm">This week</a>
+        <a href="{{ url_for('planning.view', week=next_week) }}" class="btn btn-outline-secondary btn-sm">Next <i class="bi bi-chevron-right"></i></a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card-sds p-3 h-100">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-exclamation-triangle text-danger"></i>
+                <span class="fw-semibold">Overdue ({{ overdue|length }})</span>
+            </div>
+            {% if overdue %}
+            <ul class="list-unstyled mb-0 small">
+                {% for order in overdue %}
+                <li class="d-flex justify-content-between py-1 border-bottom">
+                    <a href="{{ url_for('orders.view', order_id=order.id) }}">{{ order.code }} &middot; {{ order.client.name }}</a>
+                    <span class="text-secondary-custom">{{ order.promised_date.strftime('%d/%m') }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-secondary-custom small mb-0">Nothing overdue.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card-sds p-3 h-100">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-lightning-charge text-warning"></i>
+                <span class="fw-semibold">Express lane ({{ express_orders|length }})</span>
+            </div>
+            {% if express_orders %}
+            <ul class="list-unstyled mb-0 small">
+                {% for order in express_orders %}
+                <li class="d-flex justify-content-between py-1 border-bottom">
+                    <a href="{{ url_for('orders.view', order_id=order.id) }}">{{ order.code }} &middot; {{ order.client.name }}</a>
+                    <span class="text-secondary-custom">{{ order.promised_date.strftime('%d/%m') if order.promised_date else 'no date' }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-secondary-custom small mb-0">No express orders in the shop.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row g-2 row-cols-1 row-cols-sm-2 row-cols-lg-4 row-cols-xl-7">
+    {% for day in days %}
+    <div class="col">
+        <div class="card-sds p-3 h-100 {{ 'border-primary' if day.date == today }}">
+            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                <span class="fw-semibold">{{ day.date.strftime('%a') }}</span>
+                <span class="small text-secondary-custom">{{ day.date.strftime('%d/%m') }}</span>
+            </div>
+            <div class="progress mb-1" style="height: 6px;">
+                <div class="progress-bar bg-{{ day.level }}" style="width: {{ day.load_pct if day.load_pct <= 100 else 100 }}%"></div>
+            </div>
+            <div class="small text-secondary-custom mb-2">{{ day.minutes }} / {{ day.capacity }} min ({{ day.load_pct }}%)</div>
+            {% if day.orders %}
+            <ul class="list-unstyled mb-0 small">
+                {% for order in day.orders %}
+                <li class="mb-1">
+                    <a href="{{ url_for('orders.view', order_id=order.id) }}">{{ order.code }}</a>
+                    {% if order.express %}<i class="bi bi-lightning-charge text-warning" title="Express"></i>{% endif %}
+                    <div class="text-secondary-custom">{{ order.client.name }}</div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-secondary-custom small mb-0">No orders due.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

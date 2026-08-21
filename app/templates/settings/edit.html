@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Settings - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3 fw-bold mb-1">Settings</h1>
+    <p class="text-secondary-custom mb-0">Invoice numbers are generated automatically (e.g. 2026-0001) — no configuration needed.</p>
+</div>
+
+<form method="post" enctype="multipart/form-data" novalidate>
+    {{ form.hidden_tag() }}
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card-sds p-4 mb-3">
+                <div class="eyebrow mb-3">Planning</div>
+                <div class="mb-0">
+                    {{ form.daily_capacity_minutes.label(class_="form-label") }}
+                    <div class="input-group">
+                        {{ form.daily_capacity_minutes(class_="form-control" + (" is-invalid" if form.daily_capacity_minutes.errors else "")) }}
+                        <span class="input-group-text">min / day</span>
+                    </div>
+                    {% for error in form.daily_capacity_minutes.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    <div class="form-text">Used to charge each order's estimated alteration time against your daily capacity on the Planning calendar.</div>
+                </div>
+            </div>
+
+            <div class="card-sds p-4 mb-3">
+                <div class="eyebrow mb-3">Inventory</div>
+                <div class="mb-0">
+                    {{ form.default_low_stock_threshold.label(class_="form-label") }}
+                    {{ form.default_low_stock_threshold(class_="form-control" + (" is-invalid" if form.default_low_stock_threshold.errors else "")) }}
+                    {% for error in form.default_low_stock_threshold.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    <div class="form-text">Used for any material without its own low-stock threshold set.</div>
+                </div>
+            </div>
+
+            <div class="card-sds p-4">
+                <div class="eyebrow mb-3">Client portal</div>
+                <div class="form-check">
+                    {{ form.portal_show_prices(class_="form-check-input") }}
+                    {{ form.portal_show_prices.label(class_="form-check-label") }}
+                </div>
+                <div class="form-text">Controls whether clients see prices on their order tracking page.</div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card-sds p-4">
+                <div class="eyebrow mb-3">Shop &amp; invoice branding</div>
+
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    {% if settings and settings.logo_filename %}
+                    <img src="{{ url_for('main.uploaded_file', filename=settings.logo_filename) }}" alt="Shop logo" style="max-width: 72px; max-height: 72px; border-radius: 0.5rem; border: 1px solid var(--sds-border);">
+                    {% endif %}
+                    <div class="flex-grow-1">
+                        {{ form.logo.label(class_="form-label") }}
+                        {{ form.logo(class_="form-control form-control-sm" + (" is-invalid" if form.logo.errors else "")) }}
+                        {% for error in form.logo.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                        <div class="form-text">Shown on the client portal and invoice/receipt PDFs.</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form.company_name.label(class_="form-label") }}
+                    {{ form.company_name(class_="form-control", placeholder=app_name) }}
+                </div>
+                <div class="mb-3">
+                    {{ form.company_address.label(class_="form-label") }}
+                    {{ form.company_address(class_="form-control", rows=2) }}
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form.company_phone.label(class_="form-label") }}
+                        {{ form.company_phone(class_="form-control") }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.opening_hours.label(class_="form-label") }}
+                        {{ form.opening_hours(class_="form-control", rows=1) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form.company_vat_number.label(class_="form-label") }}
+                        {{ form.company_vat_number(class_="form-control") }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.company_iban.label(class_="form-label") }}
+                        {{ form.company_iban(class_="form-control") }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Save</button>
+</form>
+{% endblock %}

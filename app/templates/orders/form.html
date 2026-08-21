@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}New order - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('orders.list_orders') }}" class="text-secondary-custom small"><i class="bi bi-arrow-left"></i> Back to orders</a>
+    <h1 class="h3 fw-bold mt-1 mb-0">New order</h1>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card-sds p-4">
+            <form method="post" novalidate>
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    {{ form.client_id.label(class_="form-label") }}
+                    {{ form.client_id(class_="form-select" + (" is-invalid" if form.client_id.errors else "")) }}
+                    {% for error in form.client_id.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                    <div class="form-text">Client not listed yet? <a href="{{ url_for('clients.create') }}">Add them first</a>.</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-7 mb-3">
+                        {{ form.promised_date.label(class_="form-label") }}
+                        {{ form.promised_date(class_="form-control", type="date") }}
+                    </div>
+                    <div class="col-md-5 mb-3 d-flex align-items-end">
+                        <div class="form-check">
+                            {{ form.express(class_="form-check-input") }}
+                            {{ form.express.label(class_="form-check-label") }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    {{ form.internal_notes.label(class_="form-label") }}
+                    {{ form.internal_notes(class_="form-control", rows=2) }}
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Create order</button>
+                    <a href="{{ url_for('orders.list_orders') }}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if upcoming_loads %}
+    <div class="col-lg-6">
+        <div class="card-sds p-4">
+            <div class="eyebrow mb-2">Upcoming workload</div>
+            <p class="small text-secondary-custom mb-3">Reference before picking a promised date &mdash; days already near or over capacity are highlighted.</p>
+            <ul class="list-unstyled mb-0">
+                {% for day in upcoming_loads %}
+                <li class="d-flex align-items-center justify-content-between py-1 border-bottom small">
+                    <span>{{ day.date.strftime('%a %d/%m') }}</span>
+                    <div class="d-flex align-items-center gap-2" style="width: 55%;">
+                        <div class="progress flex-grow-1" style="height: 6px;">
+                            <div class="progress-bar bg-{{ day.level }}" style="width: {{ day.load_pct if day.load_pct <= 100 else 100 }}%"></div>
+                        </div>
+                        <span class="text-secondary-custom" style="min-width: 3.5rem; text-align: right;">{{ day.load_pct }}%</span>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit garment' if garment else 'Add garment' }} - {{ order.code }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('orders.view', order_id=order.id) }}" class="text-secondary-custom small"><i class="bi bi-arrow-left"></i> Back to {{ order.code }}</a>
+    <h1 class="h3 fw-bold mt-1 mb-0">{{ 'Edit garment' if garment else 'Add garment' }}</h1>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card-sds p-4">
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3" style="max-width: 280px;">
+                    {{ form.garment_type.label(class_="form-label") }}
+                    {{ form.garment_type(class_="form-select") }}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form.color.label(class_="form-label") }}
+                        {{ form.color(class_="form-control") }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.brand.label(class_="form-label") }}
+                        {{ form.brand(class_="form-control") }}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form.description.label(class_="form-label") }}
+                    {{ form.description(class_="form-control", rows=2) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.measurements_notes.label(class_="form-label") }}
+                    {{ form.measurements_notes(class_="form-control", rows=2) }}
+                </div>
+
+                <div class="mb-4">
+                    {{ form.photo.label(class_="form-label") }}
+                    {{ form.photo(class_="form-control" + (" is-invalid" if form.photo.errors else ""), accept="image/*", capture="environment") }}
+                    {% for error in form.photo.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                    <div class="form-text">Adds a new photo without replacing existing ones.</div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">{{ 'Save changes' if garment else 'Add garment' }}</button>
+                    <a href="{{ url_for('orders.view', order_id=order.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if garment %}
+    <div class="col-lg-6">
+        <div class="card-sds p-4">
+            <div class="eyebrow mb-2">Photos</div>
+            {% if garment.photos %}
+            <div class="d-flex flex-wrap gap-2">
+                {% for photo in garment.photos %}
+                <div class="text-center">
+                    <a href="{{ url_for('main.uploaded_file', filename=photo.filename) }}" target="_blank">
+                        <img src="{{ url_for('main.uploaded_file', filename=photo.thumbnail_filename) }}" alt="" width="96" height="96" style="object-fit: cover; border-radius: 0.5rem; border: 1px solid var(--sds-border);">
+                    </a>
+                    <form method="post" action="{{ url_for('orders.delete_photo', order_id=order.id, garment_id=garment.id, photo_id=photo.id) }}" class="mt-1">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2">Remove</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-secondary-custom mb-0">No photos yet. Use the form to add one.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

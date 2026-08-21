@@ -1,0 +1,531 @@
+# French translations for Seam(De)Stress.
+# Copyright (C) 2026 Seam(De)Stress
+# This file is distributed under the same license as the Seam(De)Stress
+# project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-08-16 08:08+0200\n"
+"PO-Revision-Date: 2026-08-16 07:46+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: app/__init__.py:40
+msgid "Please sign in to continue."
+msgstr "Veuillez vous connecter pour continuer."
+
+#: app/__init__.py:111
+msgid "Hems"
+msgstr "Ourlets"
+
+#: app/__init__.py:112
+msgid "Waist & Fit"
+msgstr "Taille & ajustement"
+
+#: app/__init__.py:113
+msgid "Zippers"
+msgstr "Fermetures éclair"
+
+#: app/__init__.py:114
+msgid "Sleeves"
+msgstr "Manches"
+
+#: app/__init__.py:115
+msgid "Repairs"
+msgstr "Réparations"
+
+#: app/__init__.py:116
+msgid "Curtains & Home Textiles"
+msgstr "Rideaux & textiles de maison"
+
+#: app/__init__.py:117 app/__init__.py:126
+msgid "Other"
+msgstr "Autre"
+
+#: app/__init__.py:122
+msgid "Trousers"
+msgstr "Pantalon"
+
+#: app/__init__.py:123
+msgid "Dress"
+msgstr "Robe"
+
+#: app/__init__.py:124
+msgid "Jacket"
+msgstr "Veste"
+
+#: app/__init__.py:125
+msgid "Curtain"
+msgstr "Rideau"
+
+#: app/__init__.py:131
+msgid "Received"
+msgstr "Reçue"
+
+#: app/__init__.py:132 app/templates/main/dashboard.html:28
+msgid "In progress"
+msgstr "En cours"
+
+#: app/__init__.py:133
+msgid "Ready for pickup"
+msgstr "Prête à récupérer"
+
+#: app/__init__.py:134
+msgid "Picked up"
+msgstr "Récupérée"
+
+#: app/__init__.py:135
+msgid "Cancelled"
+msgstr "Annulée"
+
+#: app/__init__.py:143
+msgid "Unpaid"
+msgstr "Non payée"
+
+#: app/__init__.py:144
+msgid "Partially paid"
+msgstr "Partiellement payée"
+
+#: app/__init__.py:145 app/__init__.py:155
+msgid "Paid"
+msgstr "Payée"
+
+#: app/__init__.py:153
+msgid "Draft"
+msgstr "Brouillon"
+
+#: app/__init__.py:154
+msgid "Sent"
+msgstr "Envoyée"
+
+#: app/__init__.py:156 app/templates/main/dashboard.html:37
+#: app/templates/main/dashboard.html:58
+msgid "Overdue"
+msgstr "En retard"
+
+#: app/blueprints/auth/forms.py:10
+msgid "Username"
+msgstr "Nom d'utilisateur"
+
+#: app/blueprints/auth/forms.py:11
+msgid "Password"
+msgstr "Mot de passe"
+
+#: app/blueprints/auth/forms.py:12
+msgid "Remember me"
+msgstr "Se souvenir de moi"
+
+#: app/blueprints/auth/forms.py:16
+msgid "Full name"
+msgstr "Nom complet"
+
+#: app/blueprints/auth/forms.py:17
+msgid "Language"
+msgstr "Langue"
+
+#: app/blueprints/auth/forms.py:18
+msgid "New password"
+msgstr "Nouveau mot de passe"
+
+#: app/blueprints/auth/routes.py:26
+msgid "Invalid username or password."
+msgstr "Nom d'utilisateur ou mot de passe invalide."
+
+#: app/blueprints/auth/routes.py:45
+msgid "You have been logged out."
+msgstr "Vous avez été déconnecté."
+
+#: app/blueprints/auth/routes.py:62
+msgid "Account updated."
+msgstr "Compte mis à jour."
+
+#: app/templates/auth/account.html:2 app/templates/auth/account.html:6
+#: app/templates/partials/topbar.html:20
+msgid "My account"
+msgstr "Mon compte"
+
+#: app/templates/auth/account.html:23
+msgid "Changes the language of this dashboard."
+msgstr "Modifie la langue de ce tableau de bord."
+
+#: app/templates/auth/account.html:30
+msgid "Leave blank to keep your current password."
+msgstr "Laissez vide pour conserver votre mot de passe actuel."
+
+#: app/templates/auth/account.html:33
+msgid "Save changes"
+msgstr "Enregistrer"
+
+#: app/templates/auth/login.html:2 app/templates/auth/login.html:23
+#: app/templates/auth/login.html:48
+msgid "Sign in"
+msgstr "Connexion"
+
+#: app/templates/auth/login.html:13
+msgid "Order management & destressing for your alterations shop."
+msgstr ""
+"Gestion des commandes et sérénité retrouvée pour votre atelier de "
+"retouches."
+
+#: app/templates/auth/login.html:16
+msgid "Workload planning"
+msgstr "Planification de la charge de travail"
+
+#: app/templates/auth/login.html:17
+msgid "Quotes & invoices"
+msgstr "Devis & factures"
+
+#: app/templates/auth/login.html:18
+msgid "Client tracking"
+msgstr "Suivi client"
+
+#: app/templates/auth/login.html:24
+msgid "Staff and admin access only."
+msgstr "Accès réservé au personnel et aux administrateurs."
+
+#: app/templates/auth/login.html:33
+msgid "e.g. admin"
+msgstr "p. ex. admin"
+
+#: app/templates/errors/403.html:2 app/templates/errors/403.html:7
+msgid "Access denied"
+msgstr "Accès refusé"
+
+#: app/templates/errors/403.html:8
+msgid "You don't have permission to view this page."
+msgstr "Vous n'avez pas la permission de voir cette page."
+
+#: app/templates/errors/403.html:9 app/templates/errors/404.html:9
+#: app/templates/errors/500.html:9
+msgid "Back to dashboard"
+msgstr "Retour au tableau de bord"
+
+#: app/templates/errors/404.html:2 app/templates/errors/404.html:7
+msgid "Page not found"
+msgstr "Page introuvable"
+
+#: app/templates/errors/404.html:8
+msgid "The page you're looking for doesn't exist or may have moved."
+msgstr "La page que vous recherchez n'existe pas ou a peut-être été déplacée."
+
+#: app/templates/errors/500.html:2 app/templates/errors/500.html:7
+msgid "Something went wrong"
+msgstr "Un problème est survenu"
+
+#: app/templates/errors/500.html:8
+msgid "An unexpected error occurred. Please try again in a moment."
+msgstr "Une erreur inattendue s'est produite. Veuillez réessayer dans un instant."
+
+#: app/templates/invoices/pdf.html:38
+msgid "DRAFT"
+msgstr "BROUILLON"
+
+#: app/templates/invoices/pdf.html:43
+msgid "Invoice"
+msgstr "Facture"
+
+#: app/templates/invoices/pdf.html:45
+msgid "Issued"
+msgstr "Émise le"
+
+#: app/templates/invoices/pdf.html:45
+msgid "Due"
+msgstr "Échéance"
+
+#: app/templates/invoices/pdf.html:51 app/templates/invoices/pdf.html:68
+#: app/templates/invoices/pdf.html:87 app/templates/orders/receipt.html:76
+msgid "VAT"
+msgstr "TVA"
+
+#: app/templates/invoices/pdf.html:56
+msgid "Bill to"
+msgstr "Facturer à"
+
+#: app/templates/invoices/pdf.html:65
+msgid "Description"
+msgstr "Description"
+
+#: app/templates/invoices/pdf.html:66
+msgid "Qty"
+msgstr "Qté"
+
+#: app/templates/invoices/pdf.html:67
+msgid "Unit price"
+msgstr "Prix unitaire"
+
+#: app/templates/invoices/pdf.html:69 app/templates/invoices/pdf.html:90
+#: app/templates/orders/receipt.html:80
+msgid "Total"
+msgstr "Total"
+
+#: app/templates/invoices/pdf.html:87
+msgid "on"
+msgstr "sur"
+
+#: app/templates/invoices/pdf.html:89 app/templates/orders/receipt.html:72
+msgid "Subtotal"
+msgstr "Sous-total"
+
+#: app/templates/invoices/pdf.html:95
+#, python-format
+msgid "Please pay to %(iban)s, quoting invoice number %(number)s."
+msgstr ""
+"Veuillez payer sur %(iban)s, en mentionnant le numéro de facture "
+"%(number)s."
+
+#: app/templates/main/_order_row.html:4 app/templates/portal/order.html:53
+msgid "Express"
+msgstr "Express"
+
+#: app/templates/main/_order_row.html:6
+msgid "no date"
+msgstr "pas de date"
+
+#: app/templates/main/_order_row.html:16
+#, python-format
+msgid "Mark %(status)s"
+msgstr "Marquer %(status)s"
+
+#: app/templates/main/dashboard.html:2 app/templates/partials/sidebar.html:10
+msgid "Dashboard"
+msgstr "Tableau de bord"
+
+#: app/templates/main/dashboard.html:7
+#, python-format
+msgid "Welcome back, %(name)s"
+msgstr "Content de vous revoir, %(name)s"
+
+#: app/templates/main/dashboard.html:8
+msgid "Here's where things stand today."
+msgstr "Voici où en sont les choses aujourd'hui."
+
+#: app/templates/main/dashboard.html:10
+msgid "New order"
+msgstr "Nouvelle commande"
+
+#: app/templates/main/dashboard.html:19 app/templates/main/dashboard.html:65
+msgid "Today's pickups"
+msgstr "Retraits du jour"
+
+#: app/templates/main/dashboard.html:46
+msgid "Due in 3 days"
+msgstr "Prévues sous 3 jours"
+
+#: app/templates/main/dashboard.html:69
+msgid "Nothing promised for today."
+msgstr "Rien de prévu pour aujourd'hui."
+
+#: app/templates/main/dashboard.html:74
+msgid "Due in the next 3 days"
+msgstr "Prévues dans les 3 prochains jours"
+
+#: app/templates/main/dashboard.html:78
+msgid "Nothing due soon."
+msgstr "Rien de prévu prochainement."
+
+#: app/templates/main/dashboard.html:85
+msgid "Recent activity"
+msgstr "Activité récente"
+
+#: app/templates/main/dashboard.html:93
+msgid "System"
+msgstr "Système"
+
+#: app/templates/main/dashboard.html:99
+msgid "No activity yet."
+msgstr "Aucune activité pour l'instant."
+
+#: app/templates/main/search.html:2 app/templates/main/search.html:6
+#: app/templates/main/search.html:9
+msgid "Search"
+msgstr "Rechercher"
+
+#: app/templates/main/search.html:8 app/templates/partials/topbar.html:8
+msgid "Search clients, orders…"
+msgstr "Rechercher clients, commandes…"
+
+#: app/templates/main/search.html:14
+msgid ""
+"Search by client name, phone, email, order code, or garment "
+"description/brand/color."
+msgstr ""
+"Recherchez par nom de client, téléphone, e-mail, code de commande, ou "
+"description/marque/couleur d'un vêtement."
+
+#: app/templates/main/search.html:19
+msgid "No results"
+msgstr "Aucun résultat"
+
+#: app/templates/main/search.html:20
+msgid "Try a different search term."
+msgstr "Essayez un autre terme de recherche."
+
+#: app/templates/main/search.html:28 app/templates/partials/sidebar.html:17
+msgid "Clients"
+msgstr "Clients"
+
+#: app/templates/main/search.html:44 app/templates/partials/sidebar.html:20
+msgid "Orders"
+msgstr "Commandes"
+
+#: app/templates/main/search.html:60 app/templates/portal/order.html:58
+msgid "Garments"
+msgstr "Vêtements"
+
+#: app/templates/orders/receipt.html:5
+msgid "Receipt"
+msgstr "Reçu"
+
+#: app/templates/orders/receipt.html:46
+msgid "Print receipt"
+msgstr "Imprimer le reçu"
+
+#: app/templates/orders/receipt.html:55
+msgid "Intake:"
+msgstr "Réception :"
+
+#: app/templates/orders/receipt.html:56
+msgid "Promised:"
+msgstr "Promis pour :"
+
+#: app/templates/orders/receipt.html:56 app/templates/portal/order.html:52
+msgid "to be confirmed"
+msgstr "à confirmer"
+
+#: app/templates/orders/receipt.html:56 app/templates/orders/ticket.html:48
+#: app/templates/orders/tickets_a4.html:63
+msgid "EXPRESS"
+msgstr "EXPRESS"
+
+#: app/templates/orders/receipt.html:67 app/templates/orders/ticket.html:55
+#: app/templates/orders/tickets_a4.html:70
+msgid "No alterations added yet"
+msgstr "Aucune retouche ajoutée pour l'instant"
+
+#: app/templates/orders/receipt.html:85
+msgid "QR code to track this order online"
+msgstr "Code QR pour suivre cette commande en ligne"
+
+#: app/templates/orders/receipt.html:86
+msgid "Scan to track your order online"
+msgstr "Scannez pour suivre votre commande en ligne"
+
+#: app/templates/orders/ticket.html:5
+msgid "Ticket"
+msgstr "Étiquette"
+
+#: app/templates/orders/ticket.html:42
+msgid "Print"
+msgstr "Imprimer"
+
+#: app/templates/orders/ticket.html:48 app/templates/orders/tickets_a4.html:63
+msgid "Due:"
+msgstr "Prévu :"
+
+#: app/templates/orders/ticket.html:48 app/templates/orders/tickets_a4.html:63
+msgid "not set"
+msgstr "non défini"
+
+#: app/templates/orders/ticket.html:60 app/templates/orders/tickets_a4.html:60
+msgid "QR code linking to this order"
+msgstr "Code QR renvoyant vers cette commande"
+
+#: app/templates/orders/tickets_a4.html:5
+msgid "Tickets"
+msgstr "Étiquettes"
+
+#: app/templates/orders/tickets_a4.html:48
+msgid "Print all tickets"
+msgstr "Imprimer toutes les étiquettes"
+
+#: app/templates/orders/tickets_a4.html:77
+msgid "This order has no garments yet."
+msgstr "Cette commande ne contient encore aucun vêtement."
+
+#: app/templates/partials/sidebar.html:8
+msgid "Overview"
+msgstr "Aperçu"
+
+#: app/templates/partials/sidebar.html:15
+msgid "Workshop"
+msgstr "Atelier"
+
+#: app/templates/partials/sidebar.html:23
+msgid "Planning"
+msgstr "Planification"
+
+#: app/templates/partials/sidebar.html:26
+msgid "Catalog"
+msgstr "Tarifs"
+
+#: app/templates/partials/sidebar.html:31
+msgid "Business"
+msgstr "Gestion"
+
+#: app/templates/partials/sidebar.html:34
+msgid "Invoices"
+msgstr "Factures"
+
+#: app/templates/partials/sidebar.html:37
+msgid "Settings"
+msgstr "Paramètres"
+
+#: app/templates/partials/topbar.html:3
+msgid "Toggle navigation"
+msgstr "Afficher/masquer la navigation"
+
+#: app/templates/partials/topbar.html:26
+msgid "Sign out"
+msgstr "Déconnexion"
+
+#: app/templates/portal/invalid.html:2
+msgid "Link not found"
+msgstr "Lien introuvable"
+
+#: app/templates/portal/invalid.html:7
+msgid "This tracking link isn't valid"
+msgstr "Ce lien de suivi n'est pas valide"
+
+#: app/templates/portal/invalid.html:8
+msgid ""
+"It may have expired or been replaced with a new one. Please contact the "
+"shop for an up-to-date link."
+msgstr ""
+"Il a peut-être expiré ou été remplacé par un nouveau. Veuillez contacter "
+"l'atelier pour obtenir un lien à jour."
+
+#: app/templates/portal/order.html:14
+msgid "Ready for pickup!"
+msgstr "Prête à récupérer !"
+
+#: app/templates/portal/order.html:18
+msgid "This order was cancelled."
+msgstr "Cette commande a été annulée."
+
+#: app/templates/portal/order.html:25
+msgid "Order"
+msgstr "Commande"
+
+#: app/templates/portal/order.html:52
+msgid "Promised date:"
+msgstr "Date promise :"
+
+#: app/templates/portal/order.html:72
+msgid "Alterations to be confirmed."
+msgstr "Retouches à confirmer."
+
+#: app/templates/portal/order.html:80
+msgid "Total (incl. VAT)"
+msgstr "Total (TVA incl.)"
+
+#~ msgid "Coming in a later milestone"
+#~ msgstr "Disponible dans une prochaine étape"
+

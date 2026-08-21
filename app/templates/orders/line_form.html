@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Edit alteration - {{ order.code }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('orders.view', order_id=order.id) }}" class="text-secondary-custom small"><i class="bi bi-arrow-left"></i> Back to {{ order.code }}</a>
+    <h1 class="h3 fw-bold mt-1 mb-0">Edit alteration</h1>
+</div>
+
+<div class="card-sds p-4" style="max-width: 560px;">
+    <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.catalog_item_id.label(class_="form-label") }}
+            <select name="catalog_item_id" class="form-select" data-role="pricing_select">
+                <option value="" {{ 'selected' if not line.catalog_item_id }}>&mdash; Custom line &mdash;</option>
+                {% for category, items in catalog_items|groupby('category') %}
+                <optgroup label="{{ category_label(category) }}">
+                    {% for item in items %}
+                    <option value="{{ item.id }}" data-name="{{ item.name }}" data-price="{{ '%.2f'|format(item.default_price) }}" data-vat="{{ '%.0f'|format(item.default_vat_rate) }}" {{ 'selected' if line.catalog_item_id == item.id }}>{{ item.name }}</option>
+                    {% endfor %}
+                </optgroup>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            {{ form.inventory_item_id.label(class_="form-label") }}
+            <select name="inventory_item_id" class="form-select" data-role="pricing_select">
+                <option value="" {{ 'selected' if not line.inventory_item_id }}>&mdash; Custom line &mdash;</option>
+                {% for category, items in inventory_items|groupby('category') %}
+                <optgroup label="{{ inventory_category_label(category) }}">
+                    {% for item in items %}
+                    <option value="{{ item.id }}" data-name="{{ item.name }}" data-price="{{ '%.2f'|format(item.default_price) }}" data-vat="{{ '%.0f'|format(item.default_vat_rate) }}" {{ 'selected' if line.inventory_item_id == item.id }}>{{ item.name }}</option>
+                    {% endfor %}
+                </optgroup>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            {{ form.description.label(class_="form-label") }}
+            {{ form.description(class_="form-control" + (" is-invalid" if form.description.errors else ""), data_role="description") }}
+            {% for error in form.description.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                {{ form.quantity.label(class_="form-label") }}
+                {{ form.quantity(class_="form-control") }}
+            </div>
+            <div class="col-md-4 mb-3">
+                {{ form.unit_price.label(class_="form-label") }}
+                {{ form.unit_price(class_="form-control", data_role="unit_price") }}
+            </div>
+            <div class="col-md-5 mb-3">
+                {{ form.vat_rate.label(class_="form-label") }}
+                {{ form.vat_rate(class_="form-control", data_role="vat_rate") }}
+            </div>
+        </div>
+
+        <div class="mb-4">
+            {{ form.notes.label(class_="form-label") }}
+            {{ form.notes(class_="form-control") }}
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Save changes</button>
+            <a href="{{ url_for('orders.view', order_id=order.id) }}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

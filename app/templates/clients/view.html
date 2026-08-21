@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}{{ client.name }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+    <div>
+        <a href="{{ url_for('clients.list_clients') }}" class="text-secondary-custom small"><i class="bi bi-arrow-left"></i> Back to clients</a>
+        <h1 class="h3 fw-bold mt-1 mb-0">{{ client.name }}</h1>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('orders.create', client_id=client.id) }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> New order
+        </a>
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('invoices.create', client_id=client.id) }}" class="btn btn-outline-secondary">
+            <i class="bi bi-receipt me-1"></i> New invoice
+        </a>
+        {% endif %}
+        <a href="{{ url_for('clients.edit', client_id=client.id) }}" class="btn btn-outline-secondary">
+            <i class="bi bi-pencil me-1"></i> Edit
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card-sds p-4">
+            <div class="eyebrow mb-3">Contact details</div>
+            <dl class="row mb-0">
+                <dt class="col-5 text-secondary-custom fw-normal">Phone</dt>
+                <dd class="col-7">{{ client.phone or '—' }}</dd>
+                <dt class="col-5 text-secondary-custom fw-normal">Email</dt>
+                <dd class="col-7">{{ client.email or '—' }}</dd>
+                <dt class="col-5 text-secondary-custom fw-normal">Address</dt>
+                <dd class="col-7">{{ client.address or '—' }}</dd>
+                <dt class="col-5 text-secondary-custom fw-normal">Language</dt>
+                <dd class="col-7 text-uppercase">{{ client.preferred_language }}</dd>
+                <dt class="col-5 text-secondary-custom fw-normal">Notifications</dt>
+                <dd class="col-7">
+                    {% if client.consent_notifications %}
+                        <span class="badge-soft badge-soft-success">Opted in</span>
+                    {% else %}
+                        <span class="badge-soft badge-soft-secondary">Opted out</span>
+                    {% endif %}
+                </dd>
+            </dl>
+        </div>
+
+        {% if client.notes %}
+        <div class="card-sds p-4 mt-3">
+            <div class="eyebrow mb-2">Notes</div>
+            <p class="mb-0" style="white-space: pre-wrap;">{{ client.notes }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-7">
+        {% if client.orders %}
+        <div class="stat-card mb-3">
+            <div class="stat-icon tint-primary"><i class="bi bi-cash"></i></div>
+            <div>
+                <div class="stat-value">&euro;{{ "%.2f"|format(client.orders|rejectattr('status', 'equalto', 'cancelled')|sum(attribute='total')) }}</div>
+                <div class="stat-label">Lifetime spend ({{ client.orders|length }} order{{ '' if client.orders|length == 1 else 's' }})</div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sds mb-0">
+                <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Intake</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                        <th class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in client.orders %}
+                    <tr>
+                        <td><a href="{{ url_for('orders.view', order_id=order.id) }}" class="fw-semibold">{{ order.code }}</a></td>
+                        <td>{{ order.intake_date.strftime('%d/%m/%Y') }}</td>
+                        <td><span class="badge-soft badge-soft-{{ order_status_badge(order.status) }}">{{ order_status_label(order.status) }}</span></td>
+                        <td><span class="badge-soft badge-soft-{{ payment_status_badge(order.payment_status) }}">{{ payment_status_label(order.payment_status) }}</span></td>
+                        <td class="text-end">&euro;{{ "%.2f"|format(order.total) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="card-sds">
+            <div class="empty-state">
+                <img src="{{ url_for('static', filename='images/empty-state.svg') }}" alt="" width="140" height="105">
+                <h2 class="h5">No orders yet</h2>
+                <p class="mb-3">Start an intake for {{ client.name }} to see their history here.</p>
+                <a href="{{ url_for('orders.create', client_id=client.id) }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> New order</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

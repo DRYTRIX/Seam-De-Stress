@@ -1,0 +1,20 @@
+<div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+    <div>
+        <a href="{{ url_for('orders.view', order_id=order.id) }}" class="fw-semibold">{{ order.code }}</a>
+        {% if order.express %}<i class="bi bi-lightning-charge text-warning" title="{{ _('Express') }}"></i>{% endif %}
+        <div class="small text-secondary-custom">
+            {{ order.client.name }} &middot; {{ order.promised_date.strftime('%d/%m/%Y') if order.promised_date else _('no date') }}
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge-soft badge-soft-{{ order_status_badge(order.status) }}">{{ order_status_label(order.status) }}</span>
+        {% set next_status = next_status_map.get(order.id) %}
+        {% if next_status %}
+        <form method="post" action="{{ url_for('orders.update_status', order_id=order.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="status" value="{{ next_status }}">
+            <button type="submit" class="btn btn-sm btn-outline-primary">{{ _('Mark %(status)s', status=order_status_label(next_status)) }}</button>
+        </form>
+        {% endif %}
+    </div>
+</div>

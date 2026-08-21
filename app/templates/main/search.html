@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ _('Search') }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3 fw-bold mb-1">{{ _('Search') }}</h1>
+    <form method="get" class="d-flex gap-2" style="max-width: 420px;">
+        <input type="search" name="q" class="form-control" value="{{ q }}" placeholder="{{ _('Search clients, orders…') }}" autofocus>
+        <button type="submit" class="btn btn-primary">{{ _('Search') }}</button>
+    </form>
+</div>
+
+{% if not q %}
+<p class="text-secondary-custom">{{ _('Search by client name, phone, email, order code, or garment description/brand/color.') }}</p>
+{% elif not clients and not orders and not garments %}
+<div class="card-sds">
+    <div class="empty-state">
+        <img src="{{ url_for('static', filename='images/empty-state.svg') }}" alt="" width="140" height="105">
+        <h2 class="h5">{{ _('No results') }}</h2>
+        <p class="mb-0">{{ _('Try a different search term.') }}</p>
+    </div>
+</div>
+{% else %}
+<div class="row g-3">
+    {% if clients %}
+    <div class="col-lg-4">
+        <div class="card-sds p-4">
+            <div class="eyebrow mb-3">{{ _('Clients') }}</div>
+            <ul class="list-unstyled mb-0 small">
+                {% for c in clients %}
+                <li class="py-1 border-bottom">
+                    <a href="{{ url_for('clients.view', client_id=c.id) }}">{{ c.name }}</a>
+                    <div class="text-secondary-custom">{{ c.phone or c.email or '' }}</div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if orders %}
+    <div class="col-lg-4">
+        <div class="card-sds p-4">
+            <div class="eyebrow mb-3">{{ _('Orders') }}</div>
+            <ul class="list-unstyled mb-0 small">
+                {% for order in orders %}
+                <li class="py-1 border-bottom">
+                    <a href="{{ url_for('orders.view', order_id=order.id) }}">{{ order.code }}</a>
+                    <div class="text-secondary-custom">{{ order.client.name }} &middot; {{ order_status_label(order.status) }}</div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if garments %}
+    <div class="col-lg-4">
+        <div class="card-sds p-4">
+            <div class="eyebrow mb-3">{{ _('Garments') }}</div>
+            <ul class="list-unstyled mb-0 small">
+                {% for garment in garments %}
+                <li class="py-1 border-bottom">
+                    <a href="{{ url_for('orders.view', order_id=garment.order_id) }}">
+                        {{ garment_type_label(garment.garment_type) }}{{ ' — ' + garment.color if garment.color }}
+                    </a>
+                    <div class="text-secondary-custom">{{ garment.order.client.name }} &middot; {{ garment.order.code }}</div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

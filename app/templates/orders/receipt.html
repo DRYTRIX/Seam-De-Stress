@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="{{ get_locale() }}">
+<head>
+    <meta charset="utf-8">
+    <title>{{ _('Receipt') }} {{ order.code }} - {{ app_name }}</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 0;
+            padding: 1.5rem;
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+        .print-actions { text-align: center; margin-bottom: 1rem; }
+        .receipt {
+            max-width: 480px;
+            margin: 0 auto;
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .receipt h1 { font-size: 1.1rem; margin: 0 0 2px; }
+        .receipt .code { font-size: 1.3rem; font-weight: 700; }
+        .receipt .meta { font-size: 0.8rem; color: #475569; margin: 2px 0; }
+        .receipt hr { border: none; border-top: 1px dashed #94a3b8; margin: 12px 0; }
+        .garment { margin-bottom: 10px; }
+        .garment-title { font-weight: 600; font-size: 0.85rem; }
+        .line { display: flex; justify-content: space-between; font-size: 0.8rem; padding: 2px 0; }
+        .totals { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 2px 0; }
+        .totals.grand { font-weight: 700; font-size: 1rem; border-top: 1px solid #cbd5e1; margin-top: 6px; padding-top: 6px; }
+        .qr { text-align: center; margin-top: 14px; }
+        .qr img { width: 110px; height: 110px; }
+        .qr .caption { font-size: 0.75rem; color: #475569; margin-top: 4px; }
+        @media print {
+            body { background: #fff; padding: 0; }
+            .print-actions { display: none; }
+            .receipt { border: none; }
+            @page { size: A5; margin: 8mm; }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-actions">
+        <button onclick="window.print()">{{ _('Print receipt') }}</button>
+    </div>
+    <div class="receipt">
+        <h1>{{ settings.company_name or app_name }}</h1>
+        {% if settings.company_address %}<div class="meta">{{ settings.company_address }}</div>{% endif %}
+        {% if settings.company_phone %}<div class="meta">{{ settings.company_phone }}</div>{% endif %}
+        <hr>
+        <div class="code">{{ order.code }}</div>
+        <div class="meta">{{ order.client.name }}</div>
+        <div class="meta">{{ _('Intake:') }} {{ order.intake_date.strftime('%d/%m/%Y') }}</div>
+        <div class="meta">{{ _('Promised:') }} {{ order.promised_date.strftime('%d/%m/%Y') if order.promised_date else _('to be confirmed') }}{{ ' — ' + _('EXPRESS') if order.express else '' }}</div>
+        <hr>
+        {% for garment in order.garments %}
+        <div class="garment">
+            <div class="garment-title">{{ garment_type_label(garment.garment_type) }}{{ ' — ' + garment.color if garment.color }}</div>
+            {% for line in garment.lines %}
+            <div class="line">
+                <span>{{ line.description }}{{ ' x' + line.quantity|string if line.quantity > 1 }}</span>
+                <span>&euro;{{ "%.2f"|format(line.line_total_with_vat) }}</span>
+            </div>
+            {% else %}
+            <div class="line"><span>{{ _('No alterations added yet') }}</span></div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        <div class="totals">
+            <span>{{ _('Subtotal') }}</span>
+            <span>&euro;{{ "%.2f"|format(order.subtotal) }}</span>
+        </div>
+        <div class="totals">
+            <span>{{ _('VAT') }}</span>
+            <span>&euro;{{ "%.2f"|format(order.vat_total) }}</span>
+        </div>
+        <div class="totals grand">
+            <span>{{ _('Total') }}</span>
+            <span>&euro;{{ "%.2f"|format(order.total) }}</span>
+        </div>
+        {% if portal_qr_data_uri %}
+        <div class="qr">
+            <img src="{{ portal_qr_data_uri }}" alt="{{ _('QR code to track this order online') }}">
+            <div class="caption">{{ _('Scan to track your order online') }}</div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

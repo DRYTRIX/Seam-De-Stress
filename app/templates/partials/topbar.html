@@ -1,0 +1,33 @@
+<div class="topbar">
+    <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-secondary d-lg-none" type="button" data-sidebar-toggle aria-label="{{ _('Toggle navigation') }}">
+            <i class="bi bi-list"></i>
+        </button>
+        <form action="{{ url_for('main.search') }}" method="get" class="d-none d-md-flex align-items-center gap-2 text-muted-custom" style="min-width: 260px;">
+            <i class="bi bi-search"></i>
+            <input type="search" name="q" class="form-control form-control-sm border-0 bg-transparent" placeholder="{{ _('Search clients, orders…') }}">
+        </form>
+    </div>
+
+    {% if current_user.is_authenticated %}
+    <div class="dropdown">
+        <button class="btn btn-sm btn-light dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="badge-soft badge-soft-primary text-uppercase">{{ current_user.role }}</span>
+            {{ current_user.full_name }}
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            <li><h6 class="dropdown-header">{{ current_user.username }}</h6></li>
+            <li><a class="dropdown-item" href="{{ url_for('auth.account') }}"><i class="bi bi-person-gear me-1"></i> {{ _('My account') }}</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <form method="post" action="{{ url_for('auth.logout') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="dropdown-item text-danger">
+                        <i class="bi bi-box-arrow-right me-1"></i> {{ _('Sign out') }}
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+    {% endif %}
+</div>

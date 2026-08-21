@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="{{ get_locale() }}">
+<head>
+    <meta charset="utf-8">
+    <title>{{ _('Tickets') }} {{ order.code }} - {{ app_name }}</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 0;
+            padding: 1rem;
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+        .print-actions { text-align: center; margin-bottom: 1rem; }
+        .sheet {
+            max-width: 210mm;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4mm;
+        }
+        .ticket {
+            background: #fff;
+            border: 1px dashed #94a3b8;
+            border-radius: 6px;
+            padding: 10px;
+        }
+        .ticket h1 { font-size: 0.9rem; margin: 0 0 2px; }
+        .ticket .code { font-size: 1.05rem; font-weight: 700; }
+        .ticket .meta { font-size: 0.7rem; color: #475569; margin: 2px 0; }
+        .ticket hr { border: none; border-top: 1px dashed #cbd5e1; margin: 6px 0; }
+        .ticket ul { padding-left: 1rem; margin: 4px 0; font-size: 0.72rem; }
+        .ticket li { margin-bottom: 2px; }
+        .ticket .qr { text-align: right; }
+        .ticket .qr img { width: 64px; height: 64px; }
+        .ticket .row { display: flex; justify-content: space-between; align-items: flex-end; }
+        @media print {
+            body { background: #fff; padding: 0; }
+            .print-actions { display: none; }
+            .ticket { border: 1px solid #cbd5e1; break-inside: avoid; }
+            @page { size: A4; margin: 10mm; }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-actions">
+        <button onclick="window.print()">{{ _('Print all tickets') }}</button>
+    </div>
+
+    {% if order.garments %}
+    <div class="sheet">
+        {% for garment in order.garments %}
+        <div class="ticket">
+            <div class="row">
+                <div>
+                    <h1>Seam(De)Stress</h1>
+                    <div class="code">{{ order.code }}</div>
+                </div>
+                <div class="qr"><img src="{{ qr_data_uri }}" alt="{{ _('QR code linking to this order') }}"></div>
+            </div>
+            <div class="meta">{{ order.client.name }}</div>
+            <div class="meta">{{ _('Due:') }} {{ order.promised_date.strftime('%d/%m/%Y') if order.promised_date else _('not set') }}{{ ' — ' + _('EXPRESS') if order.express else '' }}</div>
+            <hr>
+            <div class="meta">{{ garment_type_label(garment.garment_type) }}{{ ' — ' + garment.color if garment.color }}</div>
+            <ul>
+                {% for line in garment.lines %}
+                <li>{{ line.description }}{{ ' x' + line.quantity|string if line.quantity > 1 }}</li>
+                {% else %}
+                <li>{{ _('No alterations added yet') }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="text-align:center;">{{ _('This order has no garments yet.') }}</p>
+    {% endif %}
+</body>
+</html>

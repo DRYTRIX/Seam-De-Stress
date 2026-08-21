@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="{{ get_locale() }}">
+<head>
+    <meta charset="utf-8">
+    <title>{{ invoice.invoice_number }}</title>
+    <style>
+        @page { size: A4; margin: 20mm; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: #0f172a;
+            font-size: 11pt;
+        }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+        .header img { max-width: 120px; max-height: 80px; }
+        .company { font-size: 9pt; color: #475569; line-height: 1.5; text-align: right; }
+        .title { font-size: 22pt; font-weight: 700; margin: 0 0 4px; }
+        .meta { font-size: 9pt; color: #475569; }
+        .bill-to { margin: 24px 0; }
+        .bill-to .eyebrow { font-size: 8pt; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        th, td { padding: 6px 8px; text-align: left; font-size: 9.5pt; border-bottom: 1px solid #e2e8f0; }
+        th { text-transform: uppercase; font-size: 8pt; letter-spacing: 0.04em; color: #64748b; border-bottom: 2px solid #cbd5e1; }
+        .text-end { text-align: right; }
+        .totals { width: 260px; margin-left: auto; margin-top: 12px; }
+        .totals div { display: flex; justify-content: space-between; padding: 3px 0; font-size: 10pt; }
+        .totals .grand { font-weight: 700; font-size: 13pt; border-top: 1px solid #0f172a; margin-top: 4px; padding-top: 6px; }
+        .payment { margin-top: 32px; font-size: 9.5pt; color: #334155; }
+        .status-draft {
+            position: fixed; top: 40%; left: 15%;
+            font-size: 72pt; color: rgba(239, 68, 68, 0.15);
+            transform: rotate(-25deg); font-weight: 700;
+        }
+        .notes { margin-top: 20px; font-size: 9.5pt; color: #475569; }
+    </style>
+</head>
+<body>
+    {% if invoice.status == 'draft' %}<div class="status-draft">{{ _('DRAFT') }}</div>{% endif %}
+
+    <div class="header">
+        <div>
+            {% if logo_data_uri %}<img src="{{ logo_data_uri }}" alt="">{% endif %}
+            <div class="title">{{ _('Invoice') }}</div>
+            <div class="meta">{{ invoice.invoice_number }}</div>
+            <div class="meta">{{ _('Issued') }} {{ invoice.issue_date.strftime('%d/%m/%Y') }}{% if invoice.due_date %} &middot; {{ _('Due') }} {{ invoice.due_date.strftime('%d/%m/%Y') }}{% endif %}</div>
+        </div>
+        <div class="company">
+            <strong>{{ settings.company_name or app_name }}</strong><br>
+            {% if settings.company_address %}{{ settings.company_address|replace('\n', '<br>')|safe }}<br>{% endif %}
+            {% if settings.company_phone %}{{ settings.company_phone }}<br>{% endif %}
+            {% if settings.company_vat_number %}{{ _('VAT') }} {{ settings.company_vat_number }}<br>{% endif %}
+        </div>
+    </div>
+
+    <div class="bill-to">
+        <div class="eyebrow">{{ _('Bill to') }}</div>
+        <strong>{{ invoice.client.name }}</strong><br>
+        {% if invoice.client.address %}{{ invoice.client.address|replace('\n', '<br>')|safe }}<br>{% endif %}
+        {% if invoice.client.email %}{{ invoice.client.email }}{% endif %}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>{{ _('Description') }}</th>
+                <th>{{ _('Qty') }}</th>
+                <th>{{ _('Unit price') }}</th>
+                <th>{{ _('VAT') }}</th>
+                <th class="text-end">{{ _('Total') }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for line in invoice.lines %}
+            <tr>
+                <td>{{ line.description }}</td>
+                <td>{{ line.quantity }}</td>
+                <td>&euro;{{ "%.2f"|format(line.unit_price) }}</td>
+                <td>{{ "%.0f"|format(line.vat_rate) }}%</td>
+                <td class="text-end">&euro;{{ "%.2f"|format(line.line_total_with_vat) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="totals">
+        {% for rate, amounts in invoice.vat_breakdown.items() %}
+        <div><span>{{ _('VAT') }} {{ "%.0f"|format(rate) }}% {{ _('on') }} &euro;{{ "%.2f"|format(amounts.subtotal) }}</span><span>&euro;{{ "%.2f"|format(amounts.vat_amount) }}</span></div>
+        {% endfor %}
+        <div><span>{{ _('Subtotal') }}</span><span>&euro;{{ "%.2f"|format(invoice.subtotal) }}</span></div>
+        <div class="grand"><span>{{ _('Total') }}</span><span>&euro;{{ "%.2f"|format(invoice.total) }}</span></div>
+    </div>
+
+    {% if settings.company_iban %}
+    <div class="payment">
+        {{ _('Please pay to %(iban)s, quoting invoice number %(number)s.', iban=settings.company_iban, number=invoice.invoice_number) }}
+    </div>
+    {% endif %}
+
+    {% if invoice.notes %}
+    <div class="notes">{{ invoice.notes|replace('\n', '<br>')|safe }}</div>
+    {% endif %}
+</body>
+</html>

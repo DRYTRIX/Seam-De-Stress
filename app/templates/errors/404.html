@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{{ _('Page not found') }} - {{ app_name }}{% endblock %}
+{% block body %}
+<div class="auth-shell">
+    <div class="card-sds empty-state" style="max-width: 480px;">
+        <img src="{{ url_for('static', filename='images/empty-state.svg') }}" alt="" width="140" height="105">
+        <h1 class="h4">{{ _('Page not found') }}</h1>
+        <p>{{ _("The page you're looking for doesn't exist or may have moved.") }}</p>
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary mt-2">{{ _('Back to dashboard') }}</a>
+    </div>
+</div>
+{% endblock %}
